@@ -48,8 +48,3 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 #     pytest
 
 RUN npm install -g pnpm yarn
-
-# ============================================
-# 恢复默认用户
-# ============================================
-USER runner
