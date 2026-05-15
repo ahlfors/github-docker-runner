@@ -8,7 +8,7 @@ services:
       # 方式一：组织级 Runner（推荐）
       RUNNER_SCOPE: org
       ORG_NAME: ${ORG_NAME}
-      ACCESS_TOKEN: ${ACCESS_TOKEN}
+      RUNNER_TOKEN: ${RUNNER_TOKEN}
       
       # 方式二：仓库级 Runner（二选一，注释上面三行，取消下面注释）
       # RUNNER_SCOPE: repo
