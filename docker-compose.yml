@@ -10,6 +10,7 @@ x-runner-base: &runner-base
     RUNNER_GROUP: ${RUNNER_GROUP:-Default}
     DISABLE_AUTO_UPDATE: "true"
     RUN_AS_ROOT: "true"
+    DISABLE_AUTOMATIC_DEREGISTRATION: "true"
     CONFIGURED_ACTIONS_RUNNER_FILES_DIR: /runner-data
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
@@ -28,8 +29,8 @@ x-runner-base: &runner-base
   deploy:
     resources:
       limits:
-        cpus: '2.0'
-        memory: 4G
+        cpus: '4'
+        memory: 8G
 
 services:
   runner-1:
