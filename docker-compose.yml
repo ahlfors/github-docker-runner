@@ -1,70 +1,79 @@
+x-runner-base: &runner-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+  environment: &runner-env
+    RUNNER_SCOPE: org
+    ORG_NAME: ${ORG_NAME}
+    RUNNER_TOKEN: ${RUNNER_TOKEN}
+    LABELS: ${RUNNER_LABELS:-self-hosted,linux,x64,docker}
+    RUNNER_GROUP: ${RUNNER_GROUP:-Default}
+    DISABLE_AUTO_UPDATE: "true"
+    RUN_AS_ROOT: "true"
+    CONFIGURED_ACTIONS_RUNNER_FILES_DIR: /runner-data
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD-SHELL", "pgrep -f 'Runner.Listener' || exit 1"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 60s
+  logging:
+    driver: json-file
+    options:
+      max-size: "50m"
+      max-file: "3"
+  deploy:
+    resources:
+      limits:
+        cpus: '2.0'
+        memory: 4G
+
 services:
-  runner:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  runner-1:
+    <<: *runner-base
     environment:
-      # --- GitHub 连接配置 ---
-      # 方式一：组织级 Runner（推荐）
-      RUNNER_SCOPE: org
-      ORG_NAME: ${ORG_NAME}
-      RUNNER_TOKEN: ${RUNNER_TOKEN}
-      
-      # 方式二：仓库级 Runner（二选一，注释上面三行，取消下面注释）
-      # RUNNER_SCOPE: repo
-      # REPO_URL: ${REPO_URL}
-      # ACCESS_TOKEN: ${ACCESS_TOKEN}
-      
-      # --- Runner 配置 ---
-      RUNNER_NAME_PREFIX: ${RUNNER_NAME_PREFIX:-runner}
-      RANDOM_RUNNER_SUFFIX: "true"          # 自动生成唯一名称后缀
-      RUNNER_WORKDIR: /tmp/runner/work      # 容器内工作目录（每个容器独立）
-      LABELS: ${RUNNER_LABELS:-self-hosted,linux,x64,docker}
-      RUNNER_GROUP: ${RUNNER_GROUP:-Default}
-      
-      # --- 可选配置 ---
-      EPHEMERAL: "false"                    # true = 单次执行后销毁（适合自动伸缩）
-      DISABLE_AUTO_UPDATE: "true"           # 禁用 Runner 自动更新（镜像控制版本）
-      RUN_AS_ROOT: "true"                   # 是否以 root 运行
-
+      <<: *runner-env
+      RUNNER_NAME: ${RUNNER_NAME_PREFIX:-runner}-1
+      RUNNER_WORKDIR: /tmp/runner/work-1
     volumes:
-      # Docker-in-Docker 支持（如需在 workflow 中使用 docker 命令）
       - /var/run/docker.sock:/var/run/docker.sock
-      # 持久化工作目录到宿主机（可选，方便调试）
-      # - runner-work:/tmp/runner/work
+      - runner-data-1:/runner-data
 
-    restart: unless-stopped
+  runner-2:
+    <<: *runner-base
+    environment:
+      <<: *runner-env
+      RUNNER_NAME: ${RUNNER_NAME_PREFIX:-runner}-2
+      RUNNER_WORKDIR: /tmp/runner/work-2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner-data-2:/runner-data
 
-    # 资源限制（防止单个 Runner 占用过多资源）
-    deploy:
-      replicas: 4                           # ⬅️ 这里设置 Runner 数量
-      resources:
-        limits:
-          cpus: '4.0'
-          memory: 8G
-        reservations:
-          cpus: '0.5'
-          memory: 1G
+  runner-3:
+    <<: *runner-base
+    environment:
+      <<: *runner-env
+      RUNNER_NAME: ${RUNNER_NAME_PREFIX:-runner}-3
+      RUNNER_WORKDIR: /tmp/runner/work-3
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner-data-3:/runner-data
 
-    # 健康检查
-    healthcheck:
-      test: ["CMD-SHELL", "pgrep -f 'Runner.Listener' || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+  runner-4:
+    <<: *runner-base
+    environment:
+      <<: *runner-env
+      RUNNER_NAME: ${RUNNER_NAME_PREFIX:-runner}-4
+      RUNNER_WORKDIR: /tmp/runner/work-4
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner-data-4:/runner-data
 
-    # 日志配置
-    logging:
-      driver: json-file
-      options:
-        max-size: "50m"
-        max-file: "3"
-
-    # 网络隔离（可选）
-    networks:
-      - runner-network
-
-networks:
-  runner-network:
-    driver: bridge
+volumes:
+  runner-data-1:
+  runner-data-2:
+  runner-data-3:
+  runner-data-4:
