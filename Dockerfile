@@ -7,6 +7,7 @@ FROM myoung34/github-runner:latest
 # 切换到 root 安装软件
 USER root
 
+RUN sed -i 's/archive.ubuntu.com/mirrors.ivolces.com/g' /etc/apt/sources.list
 # 系统级依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
     # 构建工具
