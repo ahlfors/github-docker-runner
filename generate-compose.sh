@@ -86,7 +86,7 @@ cat <<YAML
     environment:
       <<: *runner-env
       RUNNER_NAME: \${RUNNER_NAME_PREFIX:-${PREFIX}}-${id}
-      RUNNER_WORKDIR: /tmp/runner/work-${id}
+      RUNNER_WORKDIR: /opt/runner-work/work-${id}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${VPREFIX}-${id}:/runner-data
