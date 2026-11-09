@@ -54,3 +54,23 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 #     pytest
 
 RUN npm install -g pnpm yarn
+
+ARG IMAGE_SYNCER_VERSION=v1.5.2
+ARG IMAGE_SYNCER_BASE_URL=https://github.com/AliyunContainerService/image-syncer/releases/download
+
+RUN set -eux; \
+    arch="$(uname -m)"; \
+    case "$arch" in \
+      x86_64)  pkg_arch=amd64 ;; \
+      aarch64) pkg_arch=arm64 ;; \
+      *) echo "unsupported arch: $arch" >&2; exit 1 ;; \
+    esac; \
+    url="${IMAGE_SYNCER_BASE_URL}/${IMAGE_SYNCER_VERSION}/image-syncer-${IMAGE_SYNCER_VERSION}-linux-${pkg_arch}.tar.gz"; \
+    curl -fL --retry 5 --retry-all-errors --connect-timeout 10 --max-time 120 \
+      -o /tmp/image-syncer.tgz "$url"; \
+    tar -tzf /tmp/image-syncer.tgz; \
+    tar -xzf /tmp/image-syncer.tgz -C /usr/local/bin; \
+    chmod +x /usr/local/bin/image-syncer; \
+    rm -f /tmp/image-syncer.tgz; \
+    image-syncer --help >/dev/null
+
