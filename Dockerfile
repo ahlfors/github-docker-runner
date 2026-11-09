@@ -12,7 +12,16 @@ RUN install -d -m 0755 /opt/runner-work \
     && install -d -m 0700 /opt/runner-tmp
 ENV TMPDIR=/opt/runner-tmp
 
-RUN sed -i 's/archive.ubuntu.com/mirrors.ivolces.com/g' /etc/apt/sources.list
+RUN set -eux; \
+    for f in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do \
+        if [ -f "$f" ]; then \
+            sed -i.bak \
+                -e 's|http://archive.ubuntu.com/ubuntu|http://mirrors.ivolces.com/ubuntu|g' \
+                -e 's|http://security.ubuntu.com/ubuntu|http://mirrors.ivolces.com/ubuntu|g' \
+                -e 's|http://ports.ubuntu.com/ubuntu-ports|http://mirrors.ivolces.com/ubuntu-ports|g' \
+                "$f"; \
+        fi; \
+    done
 # 系统级依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
     # 构建工具
