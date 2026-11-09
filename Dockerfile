@@ -61,6 +61,20 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 #     awscli \
 #     ansible \
 #     pytest
+ARG NODE_VERSION=20.11.0
+
+RUN set -eux; \
+    ARCH=$(dpkg --print-architecture); \
+    case "$ARCH" in \
+        amd64) NODE_ARCH=x64 ;; \
+        arm64) NODE_ARCH=arm64 ;; \
+        *) echo "Unsupported architecture: $ARCH" >&2; exit 1 ;; \
+    esac; \
+    wget -q "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz" -O /tmp/node.tar.xz; \
+    tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1; \
+    rm -f /tmp/node.tar.xz; \
+    node -v; \
+    npm -v
 
 RUN npm install -g pnpm yarn
 
