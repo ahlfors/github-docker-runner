@@ -29,6 +29,7 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends pcregrep; \
     rm -rf /var/lib/apt/lists/*
+    
 # 系统级依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
     # 构建工具
