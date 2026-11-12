@@ -50,7 +50,7 @@ RUN set -eux; \
         zip \
         rsync \
         openssh-client \
-        pcregrep; \
+        pcre2-utils; \
     rm -rf /var/lib/apt/lists/*
 
 # Go (按需)
