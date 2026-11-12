@@ -9,16 +9,19 @@ USER root
 
 # Trusted ancestors for workspace and private temporary test data.
 RUN install -d -m 0755 /opt/runner-work \
-    && install -d -m 0700 /opt/runner-tmp
+    && install -d -m 0700 /opt/runner-tmp \
+    && chown -R 1001:121 /opt/runner-work /opt/runner-tmp
 ENV TMPDIR=/opt/runner-tmp
 
+# Configure the Ubuntu mirror and enable the Universe component.
+# Keep package installation in the single system-dependencies layer below.
 RUN set -eux; \
     for f in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do \
         if [ -f "$f" ]; then \
             sed -i.bak \
-                -e 's|http://archive.ubuntu.com/ubuntu|http://mirrors.ivolces.com/ubuntu|g' \
-                -e 's|http://security.ubuntu.com/ubuntu|http://mirrors.ivolces.com/ubuntu|g' \
-                -e 's|http://ports.ubuntu.com/ubuntu-ports|http://mirrors.ivolces.com/ubuntu-ports|g' \
+                -e 's|https\?://archive.ubuntu.com/ubuntu|http://mirrors.ivolces.com/ubuntu|g' \
+                -e 's|https\?://security.ubuntu.com/ubuntu|http://mirrors.ivolces.com/ubuntu|g' \
+                -e 's|https\?://ports.ubuntu.com/ubuntu-ports|http://mirrors.ivolces.com/ubuntu-ports|g' \
                 "$f"; \
         fi; \
     done; \
@@ -26,9 +29,10 @@ RUN set -eux; \
         sed -i '/^Components:/ { /universe/! s/$/ universe/; }' \
             /etc/apt/sources.list.d/ubuntu.sources; \
     fi; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends pcregrep; \
-    rm -rf /var/lib/apt/lists/*
+    if [ -f /etc/apt/sources.list ]; then \
+        sed -i '/^[[:space:]]*deb[[:space:]]/ { /[[:space:]]universe\([[:space:]]\|$\)/! s/$/ universe/; }' \
+            /etc/apt/sources.list; \
+    fi
     
 # 系统级依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -47,6 +51,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     zip \
     rsync \
     ssh-client \
+    pcregrep \
     # 数据库客户端（按需）
     # postgresql-client \
     # mysql-client \
