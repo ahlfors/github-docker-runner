@@ -21,7 +21,14 @@ RUN set -eux; \
                 -e 's|http://ports.ubuntu.com/ubuntu-ports|http://mirrors.ivolces.com/ubuntu-ports|g' \
                 "$f"; \
         fi; \
-    done
+    done; \
+    if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then \
+        sed -i '/^Components:/ { /universe/! s/$/ universe/; }' \
+            /etc/apt/sources.list.d/ubuntu.sources; \
+    fi; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends pcregrep; \
+    rm -rf /var/lib/apt/lists/*
 # 系统级依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
     # 构建工具
