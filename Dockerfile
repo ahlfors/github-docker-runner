@@ -35,32 +35,23 @@ RUN set -eux; \
     fi
     
 # 系统级依赖
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    # 构建工具
-    make \
-    build-essential \
-    cmake \
-    # 语言运行时
-    python3 \
-    python3-pip \
-    python3-venv \
-    # 常用工具
-    jq \
-    wget \
-    unzip \
-    zip \
-    rsync \
-    ssh-client \
-    pcregrep \
-    # 数据库客户端（按需）
-    # postgresql-client \
-    # mysql-client \
-    && rm -rf /var/lib/apt/lists/*
-
-# Node.js (通过 NodeSource)
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+        make \
+        build-essential \
+        cmake \
+        python3 \
+        python3-pip \
+        python3-venv \
+        jq \
+        wget \
+        unzip \
+        zip \
+        rsync \
+        openssh-client \
+        pcregrep; \
+    rm -rf /var/lib/apt/lists/*
 
 # Go (按需)
 # ARG GO_VERSION=1.22.3
